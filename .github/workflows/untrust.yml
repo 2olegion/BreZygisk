@@ -1,0 +1,46 @@
+name: Untrust CI
+
+on:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+
+      - name: Setup NDK_PATH
+        run: echo "NDK_PATH=$ANDROID_NDK_LATEST_HOME" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          make all -j$(nproc)
+
+      - name: Debug list outputs
+        run: |
+          echo "--- build/out ---"
+          ls -la build/out/ 2>/dev/null || echo "build/out fehlt"
+          echo "--- Suche nach allen zip im Repo ---"
+          find . -iname "*.zip"
+
+      - name: Upload release
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-zip
+          path: "build/out/*-release.zip"
+          if-no-files-found: error
+          archive: false
+
+      - name: Upload debug
+        uses: actions/upload-artifact@v7
+        with:
+          name: debug-zip
+          path: "build/out/*-debug.zip"
+          if-no-files-found: error
+          archive: false
