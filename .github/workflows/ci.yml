@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           submodules: "recursive"
           fetch-depth: 0
@@ -23,13 +23,15 @@ jobs:
           make all -j$(nproc)
 
       - name: Upload release
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
+          name: release
           path: "build/out/ReZygisk-v*-release.zip"
-          archive: false
+          if-no-files-found: error
 
       - name: Upload debug
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
+          name: debug
           path: "build/out/ReZygisk-v*-debug.zip"
-          archive: false
+          if-no-files-found: warn
